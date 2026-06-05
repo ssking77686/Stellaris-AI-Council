@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>银河帝国指挥中心 — 群星AI智囊团</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+
+  :root {
+    --bg-deep: #0a0c14;
+    --bg-panel: #111622;
+    --bg-card: #161b2a;
+    --border: #2a3050;
+    --border-glow: #4a5580;
+    --gold: #c8a84e;
+    --gold-dim: #7a6830;
+    --accent: #4a90d9;
+    --accent-glow: #6ab0ff;
+    --text-primary: #d8dce6;
+    --text-secondary: #8890a4;
+    --text-dim: #5a6070;
+    --green: #4ec96e;
+    --red: #e05555;
+    --orange: #e8983e;
+    --cyan: #4ec9c9;
+    --purple: #8e6ec9;
+
+    --font-display: 'Orbitron', monospace;
+    --font-body: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* 星空背景 */
+  .starfield {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(1px 1px at 10% 20%, rgba(200,200,255,0.6), transparent),
+      radial-gradient(1px 1px at 25% 55%, rgba(200,220,255,0.5), transparent),
+      radial-gradient(1px 1px at 40% 10%, rgba(220,220,255,0.7), transparent),
+      radial-gradient(1px 1px at 55% 70%, rgba(200,200,240,0.4), transparent),
+      radial-gradient(1px 1px at 70% 30%, rgba(220,210,255,0.6), transparent),
+      radial-gradient(1px 1px at 85% 60%, rgba(200,220,250,0.5), transparent),
+      radial-gradient(1px 1px at 15% 80%, rgba(240,230,255,0.4), transparent),
+      radial-gradient(1px 1px at 60% 45%, rgba(210,200,255,0.6), transparent),
+      radial-gradient(1px 1px at 33% 38%, rgba(230,220,255,0.3), transparent),
+      radial-gradient(1px 1px at 78% 15%, rgba(200,210,255,0.5), transparent),
+      radial-gradient(2px 2px at 20% 65%, rgba(180,180,220,0.3), transparent),
+      radial-gradient(2px 2px at 90% 25%, rgba(200,200,230,0.4), transparent),
+      radial-gradient(2px 2px at 5% 40%, rgba(220,210,240,0.35), transparent);
+  }
+
+  /* 主布局 */
+  .app-layout {
+    position: relative; z-index: 1;
+    display: grid;
+    grid-template-columns: 220px 1fr 320px;
+    grid-template-rows: 64px 1fr;
+    grid-template-areas:
+      "topbar topbar topbar"
+      "sidebar main right-panel";
+    height: 100vh;
+  }
+
+  /* ===== 顶部资源栏 ===== */
+  .topbar {
+    grid-area: topbar;
+    background: linear-gradient(180deg, rgba(22,27,42,0.98) 0%, rgba(17,22,34,0.95) 100%);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 0;
+    backdrop-filter: blur(10px);
+  }
+  .topbar .empire-name {
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    white-space: nowrap;
+    padding-right: 20px;
+    border-right: 1px solid var(--border);
+    margin-right: 8px;
+  }
+  .topbar .resources {
+    display: flex;
+    gap: 4px;
+    flex: 1;
+    overflow-x: auto;
+  }
+  .topbar .resource-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .topbar .resource-item:hover { background: rgba(255,255,255,0.04); }
+  .topbar .resource-icon {
+    width: 22px; height: 22px;
+    border-radius: 3px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+  .topbar .resource-icon.energy { background: rgba(200,180,50,0.2); color: #e8c830; }
+  .topbar .resource-icon.mineral { background: rgba(200,120,50,0.2); color: #e89030; }
+  .topbar .resource-icon.food { background: rgba(100,200,80,0.2); color: #60c840; }
+  .topbar .resource-icon.goods { background: rgba(180,140,220,0.2); color: #b090e0; }
+  .topbar .resource-icon.alloy { background: rgba(160,180,200,0.2); color: #a0c0d0; }
+  .topbar .resource-icon.influence { background: rgba(200,140,80,0.2); color: #e0a040; }
+  .topbar .resource-icon.unity { background: rgba(120,180,220,0.2); color: #70c0e0; }
+  .topbar .resource-value {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .topbar .resource-delta {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    margin-left: -2px;
+  }
+  .topbar .resource-delta.positive { color: var(--green); }
+  .topbar .resource-delta.negative { color: var(--red); }
+  .topbar .game-date {
+    font-family: var(--font-display);
+    font-size: 12px;
+    color: var(--text-secondary);
+    letter-spacing: 1px;
+    white-space: nowrap;
+    padding-left: 16px;
+    border-left: 1px solid var(--border);
+    margin-left: 8px;
+  }
+  .topbar .quick-actions {
+    display: flex;
+    gap: 8px;
+    margin-left: 16px;
+  }
+  .topbar .btn-icon {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    width: 32px; height: 32px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .topbar .btn-icon:hover {
+    border-color: var(--gold-dim);
+    color: var(--gold);
+  }
+
+  /* ===== 左侧导航 ===== */
+  .sidebar {
+    grid-area: sidebar;
+    background: linear-gradient(90deg, rgba(17,22,34,0.98) 0%, rgba(14,18,30,0.95) 100%);
+    border-right: 1px solid var(--border);
+    padding: 16px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .sidebar .nav-section {
+    padding: 8px 16px 4px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    font-family: var(--font-display);
+  }
+  .sidebar .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    margin: 0 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-size: 14px;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+  .sidebar .nav-item:hover {
+    background: rgba(255,255,255,0.04);
+    color: var(--text-primary);
+  }
+  .sidebar .nav-item.active {
+    background: rgba(200,168,78,0.1);
+    color: var(--gold);
+    border-left: 2px solid var(--gold);
+    margin-left: 4px;
+  }
+  .sidebar .nav-icon { font-size: 18px; width: 24px; text-align: center; }
+  .sidebar .nav-badge {
+    margin-left: auto;
+    background: var(--red);
+    color: #fff;
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 8px;
+    font-family: var(--font-mono);
+  }
+
+  /* ===== 主内容区 ===== */
+  .main-content {
+    grid-area: main;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .page-title {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .page-subtitle {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+
+  /* 卡片 */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+  .card-grid.three { grid-template-columns: repeat(3, 1fr); }
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px;
+    transition: border-color 0.3s;
+  }
+  .card:hover { border-color: var(--border-glow); }
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(42,48,80,0.5);
+  }
+  .card-icon {
+    width: 36px; height: 36px;
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .card-title {
+    font-family: var(--font-display);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .card-subtitle {
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+
+  /* 指标行 */
+  .metrics { display: flex; flex-direction: column; gap: 8px; }
+  .metric-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13px;
+  }
+  .metric-label { color: var(--text-secondary); }
+  .metric-value { font-family: var(--font-mono); font-weight: 600; }
+  .metric-value.good { color: var(--green); }
+  .metric-value.warn { color: var(--orange); }
+  .metric-value.bad { color: var(--red); }
+
+  /* 进度条 */
+  .progress-bar {
+    height: 4px;
+    background: rgba(42,48,80,0.5);
+    border-radius: 2px;
+    margin-top: 4px;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.6s;
+  }
+  .progress-fill.gold { background: linear-gradient(90deg, var(--gold-dim), var(--gold)); }
+  .progress-fill.blue { background: linear-gradient(90deg, #2a5080, var(--accent)); }
+  .progress-fill.green { background: linear-gradient(90deg, #2a6040, var(--green)); }
+
+  /* 状态指示灯 */
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .status-dot.good { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .status-dot.warn { background: var(--orange); box-shadow: 0 0 6px var(--orange); }
+  .status-dot.bad { background: var(--red); box-shadow: 0 0 6px var(--red); }
+
+  /* ===== 右侧面板 ===== */
+  .right-panel {
+    grid-area: right-panel;
+    background: linear-gradient(270deg, rgba(17,22,34,0.98) 0%, rgba(14,18,30,0.95) 100%);
+    border-left: 1px solid var(--border);
+    padding: 16px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .panel-section-title {
+    font-family: var(--font-display);
+    font-size: 10px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+  }
+
+  .event-list { display: flex; flex-direction: column; gap: 6px; }
+  .event-item {
+    padding: 10px 12px;
+    background: rgba(22,27,42,0.6);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .event-item:hover { border-color: var(--border-glow); }
+  .event-time {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+  }
+  .event-text { color: var(--text-secondary); line-height: 1.5; }
+  .event-tag {
+    display: inline-block;
+    font-size: 9px;
+    padding: 1px 6px;
+    border-radius: 2px;
+    margin-right: 4px;
+    font-family: var(--font-display);
+    letter-spacing: 0.5px;
+  }
+  .event-tag.proposal { background: rgba(74,144,217,0.2); color: var(--accent-glow); }
+  .event-tag.report { background: rgba(78,201,110,0.2); color: var(--green); }
+  .event-tag.alert { background: rgba(224,85,85,0.2); color: var(--red); }
+
+  /* 按钮 */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-family: var(--font-display);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-transform: uppercase;
+    border: none;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, #7a6830 0%, #c8a84e 100%);
+    color: #0a0c14;
+  }
+  .btn-primary:hover { box-shadow: 0 0 20px rgba(200,168,78,0.3); }
+  .btn-secondary {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+  }
+  .btn-secondary:hover { border-color: var(--text-secondary); color: var(--text-primary); }
+  .btn-danger {
+    background: transparent;
+    border: 1px solid rgba(224,85,85,0.4);
+    color: var(--red);
+  }
+  .btn-danger:hover { background: rgba(224,85,85,0.1); }
+
+  /* 朝会按钮（特殊） */
+  .btn-court {
+    background: linear-gradient(135deg, rgba(200,168,78,0.15) 0%, rgba(200,168,78,0.05) 100%);
+    border: 1px solid var(--gold-dim);
+    color: var(--gold);
+    font-size: 13px;
+    padding: 12px 24px;
+    letter-spacing: 3px;
+  }
+  .btn-court:hover {
+    border-color: var(--gold);
+    box-shadow: 0 0 30px rgba(200,168,78,0.2);
+    transform: translateY(-1px);
+  }
+
+  /* 滚动条 */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--border-glow); }
+
+  /* 响应式 */
+  @media (max-width: 1200px) {
+    .app-layout { grid-template-columns: 200px 1fr; }
+    .right-panel { display: none; }
+  }
+  @media (max-width: 768px) {
+    .app-layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .card-grid, .card-grid.three { grid-template-columns: 1fr; }
+  }
+
+  /* Toast 通知 */
+  .toast-container {
+    position: fixed; bottom: 20px; right: 20px;
+    z-index: 1000;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .toast {
+    padding: 12px 18px;
+    border-radius: 4px;
+    font-size: 13px;
+    animation: slideIn 0.3s ease;
+    border: 1px solid;
+  }
+  .toast.info { background: rgba(17,22,34,0.95); border-color: var(--accent); color: var(--accent-glow); }
+  .toast.success { background: rgba(17,22,34,0.95); border-color: var(--green); color: var(--green); }
+  @keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+</style>
+</head>
+<body>
+
+<div class="starfield"></div>
+
+<div class="app-layout">
+
+  <!-- ===== 顶部资源栏 ===== -->
+  <header class="topbar">
+    <span class="empire-name">✦ 银河帝国</span>
+    <div class="resources">
+      <div class="resource-item">
+        <span class="resource-icon energy">⚡</span>
+        <span class="resource-value">2,847</span>
+        <span class="resource-delta positive">+24</span>
+      </div>
+      <div class="resource-item">
+        <span class="resource-icon mineral">⛏</span>
+        <span class="resource-value">1,203</span>
+        <span class="resource-delta positive">+18</span>
+      </div>
+      <div class="resource-item">
+        <span class="resource-icon food">🌾</span>
+        <span class="resource-value">456</span>
+        <span class="resource-delta positive">+8</span>
+      </div>
+      <div class="resource-item">
+        <span class="resource-icon goods">📦</span>
+        <span class="resource-value">312</span>
+        <span class="resource-delta negative">-3</span>
+      </div>
+      <div class="resource-item">
+        <span class="resource-icon alloy">⚙</span>
+        <span class="resource-value">89</span>
+        <span class="resource-delta positive">+5</span>
+      </div>
+      <div class="resource-item">
+        <span class="resource-icon influence">★</span>
+        <span class="resource-value">340</span>
+        <span class="resource-delta positive">+3</span>
+      </div>
+      <div class="resource-item">
+        <span class="resource-icon unity">✦</span>
+        <span class="resource-value">1,050</span>
+        <span class="resource-delta positive">+12</span>
+      </div>
+    </div>
+    <span class="game-date">2252.06.05</span>
+    <div class="quick-actions">
+      <button class="btn-icon" title="召开朝会" onclick="showToast('success','帝国朝会已召开')">👑</button>
+      <button class="btn-icon" title="通知" onclick="showToast('info','财政大臣提交了新的建造提议')">🔔</button>
+      <button class="btn-icon" title="设置">⚙</button>
+    </div>
+  </header>
+
+  <!-- ===== 左侧导航 ===== -->
+  <nav class="sidebar">
+    <div class="nav-section">指挥中心</div>
+    <a class="nav-item active"><span class="nav-icon">◈</span>帝国仪表盘</a>
+    <a class="nav-item"><span class="nav-icon">💬</span>大臣对话<span class="nav-badge">3</span></a>
+    <a class="nav-item"><span class="nav-icon">📋</span>审批面板<span class="nav-badge">2</span></a>
+
+    <div class="nav-section" style="margin-top:12px;">帝国议会</div>
+    <a class="nav-item"><span class="nav-icon">👑</span>朝会大厅</a>
+    <a class="nav-item"><span class="nav-icon">📜</span>帝国编年史</a>
+
+    <div class="nav-section" style="margin-top:12px;">大臣</div>
+    <a class="nav-item"><span class="nav-icon">💰</span>财政大臣</a>
+    <a class="nav-item"><span class="nav-icon">⚔</span>军事大臣</a>
+    <a class="nav-item"><span class="nav-icon">🔬</span>首席科学官</a>
+    <a class="nav-item"><span class="nav-icon">🤝</span>外交大臣</a>
+    <a class="nav-item"><span class="nav-icon">🏛</span>内政大臣</a>
+  </nav>
+
+  <!-- ===== 主内容区 ===== -->
+  <main class="main-content">
+    <div class="page-header">
+      <div>
+        <div class="page-title">帝国仪表盘</div>
+        <div class="page-subtitle">银河帝国 · 第 52 年 · 稳定度 78%</div>
+      </div>
+      <button class="btn btn-court" onclick="showToast('info','正在召集大臣上朝...')">👑 召开朝会</button>
+    </div>
+
+    <!-- 帝国概况 -->
+    <div class="card-grid three">
+      <!-- 经济概览 -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon" style="background:rgba(200,168,78,0.15);">💰</div>
+          <div>
+            <div class="card-title">帝国经济</div>
+            <div class="card-subtitle">财政大臣 · 瓦伦·喀山</div>
+          </div>
+          <div style="margin-left:auto;"><span class="status-dot good"></span></div>
+        </div>
+        <div class="metrics">
+          <div class="metric-row">
+            <span class="metric-label">月收入</span>
+            <span class="metric-value good">+72 ⚡</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill gold" style="width:75%;"></div></div>
+          <div class="metric-row">
+            <span class="metric-label">月支出</span>
+            <span class="metric-value warn">-48 ⚡</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">储备可维持</span>
+            <span class="metric-value">59 个月</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">贸易额</span>
+            <span class="metric-value">156 ⚡</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 军事实力 -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon" style="background:rgba(224,85,85,0.15);">⚔</div>
+          <div>
+            <div class="card-title">军事实力</div>
+            <div class="card-subtitle">军事大臣 · 塔罗斯·阿基里斯</div>
+          </div>
+          <div style="margin-left:auto;"><span class="status-dot good"></span></div>
+        </div>
+        <div class="metrics">
+          <div class="metric-row">
+            <span class="metric-label">舰队总战力</span>
+            <span class="metric-value">3,200 ⚔</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill blue" style="width:65%;"></div></div>
+          <div class="metric-row">
+            <span class="metric-label">海军容量</span>
+            <span class="metric-value">28 / 40</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">现役舰队</span>
+            <span class="metric-value">3 支</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">星堡数量</span>
+            <span class="metric-value">4 座</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 科研进展 -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon" style="background:rgba(78,201,201,0.15);">🔬</div>
+          <div>
+            <div class="card-title">科研进展</div>
+            <div class="card-subtitle">首席科学官 · 莉亚·诺瓦</div>
+          </div>
+          <div style="margin-left:auto;"><span class="status-dot good"></span></div>
+        </div>
+        <div class="metrics">
+          <div class="metric-row">
+            <span class="metric-label">物理学研究</span>
+            <span class="metric-value">+96 / 月</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill green" style="width:60%;"></div></div>
+          <div class="metric-row">
+            <span class="metric-label">社会学研究</span>
+            <span class="metric-value">+88 / 月</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">工程学研究</span>
+            <span class="metric-value">+102 / 月</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">当前科技</span>
+            <span class="metric-value" style="color:var(--cyan);">先进激光武器</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 外交 + 内政 -->
+    <div class="card-grid">
+      <!-- 外交态势 -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon" style="background:rgba(142,110,201,0.15);">🤝</div>
+          <div>
+            <div class="card-title">外交态势</div>
+            <div class="card-subtitle">外交大臣 · 塞拉斯·艾瑞斯</div>
+          </div>
+          <div style="margin-left:auto;"><span class="status-dot warn"></span></div>
+        </div>
+        <div class="metrics">
+          <div class="metric-row">
+            <span class="metric-label">联邦成员</span>
+            <span class="metric-value good">银河理事会成员</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">邻国关系</span>
+            <span class="metric-value warn">2 国态度冷淡</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">情报网络</span>
+            <span class="metric-value">3 个活跃</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 内政稳定 -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon" style="background:rgba(100,160,200,0.15);">🏛</div>
+          <div>
+            <div class="card-title">内政与人口</div>
+            <div class="card-subtitle">内政大臣 · 艾琳·沃斯</div>
+          </div>
+          <div style="margin-left:auto;"><span class="status-dot good"></span></div>
+        </div>
+        <div class="metrics">
+          <div class="metric-row">
+            <span class="metric-label">总人口</span>
+            <span class="metric-value">48 POP</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">稳定度</span>
+            <span class="metric-value good">78%</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill gold" style="width:78%;"></div></div>
+          <div class="metric-row">
+            <span class="metric-label">帝国规模</span>
+            <span class="metric-value">62 / 80</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== 右侧事件面板 ===== -->
+  <aside class="right-panel">
+    <div class="panel-section-title">📡 帝国动态</div>
+    <div class="event-list">
+      <div class="event-item">
+        <div class="event-time">2252.06.05 09:30</div>
+        <span class="event-tag proposal">提议</span>
+        <span class="event-text">财政大臣提议建造半人马座α采矿站（矿物+8/月，花费100矿物）</span>
+      </div>
+      <div class="event-item">
+        <div class="event-time">2252.06.04 14:15</div>
+        <span class="event-tag report">报告</span>
+        <span class="event-text">军事大臣完成舰队演习，第二舰队战力提升至1,200</span>
+      </div>
+      <div class="event-item">
+        <div class="event-time">2252.06.03 08:00</div>
+        <span class="event-tag alert">预警</span>
+        <span class="event-text">外交大臣警告：邻国"泽恩共同体"舰队出现在边境</span>
+      </div>
+      <div class="event-item">
+        <div class="event-time">2252.06.01 12:00</div>
+        <span class="event-tag report">报告</span>
+        <span class="event-text">首席科学官报告：物理学研究取得突破，解锁新科技分支</span>
+      </div>
+      <div class="event-item">
+        <div class="event-time">2252.05.28 16:45</div>
+        <span class="event-tag proposal">提议</span>
+        <span class="event-text">军事大臣提议在边境星系建造星堡（防御+300，花费200合金）</span>
+      </div>
+    </div>
+
+    <div class="panel-section-title" style="margin-top:8px;">🗓 待审批</div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div style="padding:12px;background:rgba(22,27,42,0.8);border:1px solid var(--gold-dim);border-radius:4px;">
+        <div style="font-size:13px;font-weight:600;color:var(--gold);margin-bottom:4px;">🪐 半人马座α采矿站</div>
+        <div style="font-size:11px;color:var(--text-secondary);margin-bottom:8px;">财政大臣提议 · 花费 100 矿物 · 收益 +8/月</div>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-primary" style="padding:5px 12px;font-size:10px;">批准</button>
+          <button class="btn btn-secondary" style="padding:5px 12px;font-size:10px;">拒绝</button>
+        </div>
+      </div>
+      <div style="padding:12px;background:rgba(22,27,42,0.8);border:1px solid var(--gold-dim);border-radius:4px;">
+        <div style="font-size:13px;font-weight:600;color:var(--gold);margin-bottom:4px;">🛡 边境星堡</div>
+        <div style="font-size:11px;color:var(--text-secondary);margin-bottom:8px;">军事大臣提议 · 花费 200 合金 · 防御+300</div>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-primary" style="padding:5px 12px;font-size:10px;">批准</button>
+          <button class="btn btn-secondary" style="padding:5px 12px;font-size:10px;">拒绝</button>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+  function showToast(type, message) {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+  }
+</script>
+</body>
+</html>

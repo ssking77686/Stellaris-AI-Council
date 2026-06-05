@@ -1,0 +1,33 @@
+# 密钥
+.env
+
+# 数据库
+*.db
+
+# 游戏存档
+*.sav
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
+dist/
+
+# Node
+node_modules/
+.parcel-cache/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Playwright MCP 临时文件
+.playwright-mcp/
+
+# Claude Code 配置（含本地路径）
+CLAUDE.md
