@@ -40,7 +40,7 @@ export const api = {
 
   // 编年史
   getChronicle: (limit = 60) =>
-    request<any[]>(`/api/chronicle/?limit=${limit}`),
+    request<import('./types').EmpireEvent[]>(`/api/chronicle/?limit=${limit}`),
 
   // 存档管理
   getWatcherStatus: () =>

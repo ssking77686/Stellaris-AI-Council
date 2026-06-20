@@ -44,7 +44,7 @@ export default function CourtHall() {
     }).catch(() => {});
   }, []);
 
-  useWebSocket(useCallback((msg: { type: string; data: any }) => {
+  useWebSocket(useCallback((msg) => {
     if (msg.type === 'court_speech') {
       setSpeeches((prev) => prev.some((s) => s.time === msg.data.time) ? prev : [...prev, msg.data]);
       setSession((prev) => prev ? { ...prev, status: msg.data.stage } : prev);

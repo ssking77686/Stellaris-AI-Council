@@ -1,6 +1,8 @@
 import { NavLink } from 'react-router-dom';
 
-const navSections = [
+interface NavItem { icon: string; label: string; to: string; badge?: string }
+
+const navSections: { title: string; items: NavItem[] }[] = [
   {
     title: '指挥中心',
     items: [

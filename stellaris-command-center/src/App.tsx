@@ -33,21 +33,23 @@ function AppLayout({ children }: { children: React.ReactNode }) {
       case 'empire_tick':
         addToast('empire_tick', `时间推进 · ${msg.data.state.game_date}`);
         break;
-      case 'periodic_report':
+      case 'periodic_report': {
         const alerts = msg.data.alerts?.length
           ? `预警: ${msg.data.alerts.join(', ')}`
           : '帝国运转正常';
         addToast('periodic_report', `帝国报告 · ${msg.data.date} · ${alerts}`);
         break;
+      }
       case 'coordination':
         addToast('coordination', `协商完成: ${msg.data.from} ↔ ${msg.data.to}`);
         break;
-      case 'save_updated':
+      case 'save_updated': {
         const d = msg.data;
         const alertText = d.alerts?.length ? ` · 预警: ${d.alerts.join(', ')}` : '';
         addToast('save_updated',
           `存档已更新 · ${d.game_date} · ${d.empire_name} · ${d.summary?.planets || 0}星球 · ${d.summary?.fleet_power || 0}战力${alertText}`);
         break;
+      }
     }
   });
 

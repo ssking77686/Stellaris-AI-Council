@@ -67,7 +67,7 @@ export default function ResourceGauges() {
   return (
     <div className="flex justify-center gap-4 py-3 px-4 bg-[#111827] border border-[hsl(222,28%,18%)] rounded-lg">
       {gauges.map((g) => (
-        <RingGauge key={g.key} value={Number((state as any)[g.key]) || 0} max={g.max} color={g.color} icon={g.icon} label={g.label} />
+        <RingGauge key={g.key} value={Number(state[g.key as keyof EmpireState]) || 0} max={g.max} color={g.color} icon={g.icon} label={g.label} />
       ))}
     </div>
   );

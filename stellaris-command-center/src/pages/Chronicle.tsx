@@ -74,11 +74,10 @@ export default function Chronicle() {
   const [filter, setFilter] = useState('all');
   const [loading, setLoading] = useState(true);
 
-  const tagSubtype: Record<string, string> = {
-    '提议': 'proposal', '报告': 'report', '预警': 'alert', '协商': 'coordination',
-  };
-
   useEffect(() => {
+    const tagSubtype: Record<string, string> = {
+      '提议': 'proposal', '报告': 'report', '预警': 'alert', '协商': 'coordination',
+    };
     fetch('http://localhost:8001/api/chronicle/?limit=60').then(r => r.json())
       .then(setEntries).catch(() => {
         const evEntries: ChronicleEntry[] = fallbackEvents.map((e) => ({

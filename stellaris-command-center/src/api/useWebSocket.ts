@@ -1,10 +1,12 @@
 import { useEffect, useRef } from 'react';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type WSHandler = (data: any) => void;
+
+export type { WSHandler };
 
 const listeners = new Map<string, Set<WSHandler>>();
 let ws: WebSocket | null = null;
-let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 let retryCount = 0;
 const MAX_RETRIES = 3;
 
@@ -25,7 +27,7 @@ function connect() {
   ws.onclose = () => {
     if (retryCount < MAX_RETRIES) {
       retryCount++;
-      reconnectTimer = setTimeout(connect, 5000);
+      setTimeout(connect, 5000);
     }
   };
 
@@ -36,12 +38,14 @@ function connect() {
 
 export function useWebSocket(onMessage: WSHandler) {
   const handlerRef = useRef(onMessage);
-  handlerRef.current = onMessage;
+
+  useEffect(() => {
+    handlerRef.current = onMessage;
+  });
 
   useEffect(() => {
     const key = Symbol('ws');
     const handlerSet = new Set<WSHandler>();
-    const wrapped: WSHandler = (data) => handlerSet.forEach((h) => h(data));
     handlerSet.add((data) => handlerRef.current(data));
     listeners.set(key.toString(), handlerSet);
 

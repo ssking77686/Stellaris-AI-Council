@@ -12,7 +12,6 @@ function buildAgentData(state: EmpireState | null, infos: AgentInfo[]): AgentDat
   return fallbackAgents.map((a) => {
     const info = infoMap.get(a.id);
     let metrics = a.metrics;
-    let analysis = a.analysis;
     let progress = a.progress;
 
     switch (a.id) {
