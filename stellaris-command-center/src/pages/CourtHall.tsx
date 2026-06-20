@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useWebSocket } from '@/api/useWebSocket';
+import { api } from '@/api/client';
 
 interface Speech { session_id: string; stage: string; agent_id: string; speaker: string; text: string; time: string; }
 interface CourtData { id: string; status: string; transcript: Speech[]; created_at: string; }
@@ -16,6 +17,16 @@ const agentIcons: Record<string, string> = {
   system: '👑', finance: '💰', military: '⚔', science: '🔬',
   foreign: '🤝', interior: '🏛', construction: '🏗',
 };
+
+function safeDate(d: string | undefined | null): string {
+  try { return d ? new Date(d).toLocaleDateString('zh-CN') : '未知'; }
+  catch { return '未知'; }
+}
+
+function safeTime(d: string | undefined | null): string {
+  try { return d ? new Date(d).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '--:--:--'; }
+  catch { return '--:--:--'; }
+}
 
 function stageBadge(stage: string) {
   const label: Record<string, string> = { opening: '开幕', reporting: '汇报', discussing: '讨论', closing: '闭幕', closed: '已结束' };
@@ -36,10 +47,10 @@ export default function CourtHall() {
   const [history, setHistory] = useState<CourtData[]>([]);
 
   useEffect(() => {
-    fetch('http://localhost:8001/api/court/current').then(r => r.json()).then((d) => {
+    api.getCourtCurrent().then((d: any) => {
       if (d.session) { setSession(d.session); setSpeeches(d.session.transcript || []); }
       else {
-        fetch('http://localhost:8001/api/court/history?limit=5').then(r => r.json()).then(setHistory).catch(() => {});
+        api.getCourtHistory(5).then(setHistory).catch(() => {});
       }
     }).catch(() => {});
   }, []);
@@ -57,8 +68,7 @@ export default function CourtHall() {
   const startCourt = async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:8001/api/court/start', { method: 'POST' });
-      const data = await res.json();
+      const data = await api.startCourt();
       setSession({ id: data.session_id, status: 'opening', transcript: [], created_at: new Date().toISOString() });
       setSpeeches([]);
     } catch { /* ignore */ }
@@ -113,7 +123,7 @@ export default function CourtHall() {
                 <span className="font-orbitron text-[10px] text-[#d4af37] tracking-[1px]">{sp.speaker}</span>
                 {stageBadge(sp.stage)}
                 <span className="text-[9px] text-[#4b5563] font-mono ml-auto">
-                  {new Date(sp.time).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                  {safeTime(sp.time)}
                 </span>
               </div>
               <div className="markdown-body whitespace-pre-wrap">{sp.text}</div>
@@ -128,7 +138,7 @@ export default function CourtHall() {
               <div key={h.id} className="p-3 bg-[#0d111f] border border-[hsl(222,28%,18%)] rounded-lg cursor-pointer hover:border-[#8b6914] transition-all">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-[#d4af37] font-semibold">
-                    朝会 · {new Date(h.created_at).toLocaleDateString('zh-CN')}
+                    朝会 · {safeDate(h.created_at)}
                   </span>
                   <span className="text-[10px] text-[#4b5563]">{h.transcript.length} 条发言</span>
                 </div>

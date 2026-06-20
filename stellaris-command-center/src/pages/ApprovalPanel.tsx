@@ -11,6 +11,11 @@ const agentNames: Record<string, string> = {
   foreign: '外交大臣', interior: '内政大臣', construction: '建造与殖民大臣',
 };
 
+function safeDate(d: string | undefined | null): string {
+  try { return d ? new Date(d).toLocaleDateString('zh-CN') : '未知'; }
+  catch { return '未知'; }
+}
+
 function parseCosts(cost: string): { label: string; amount: number }[] {
   if (!cost) return [];
   try {
@@ -94,7 +99,7 @@ export default function ApprovalPanel() {
                 <div className="flex-1">
                   <div className="text-base font-semibold text-[#d4af37] mb-0.5">{app.title}</div>
                   <div className="text-[11px] text-[#4b5563] mb-3">
-                    {agentNames[app.agent_id] || app.agent_id} 提议 · {new Date(app.created_at).toLocaleDateString('zh-CN')}
+                    {agentNames[app.agent_id] || app.agent_id} 提议 · {safeDate(app.created_at)}
                   </div>
                   <p className="text-[13px] text-[#94a3b8] leading-relaxed mb-3">{app.description}</p>
                   {app.cost && (

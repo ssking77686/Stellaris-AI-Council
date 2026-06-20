@@ -57,7 +57,7 @@ def _find_nodejs() -> str | None:
     ]
     # 也检查 npm 全局安装的 node
     try:
-        result = subprocess.run(["where", "node"], capture_output=True, text=True, shell=True, timeout=5)
+        result = subprocess.run(["where", "node"], capture_output=True, text=True, timeout=5)
         if result.returncode == 0:
             node_path = result.stdout.strip().split("\n")[0]
             return str(Path(node_path).parent)
@@ -78,7 +78,7 @@ def _setup_path():
 
 def check_command(cmd: str, name: str) -> bool:
     try:
-        subprocess.run(cmd, capture_output=True, shell=True, timeout=10)
+        subprocess.run(cmd, capture_output=True, timeout=10)
         return True
     except Exception:
         log("check", f"Not found: {name}", "red")
