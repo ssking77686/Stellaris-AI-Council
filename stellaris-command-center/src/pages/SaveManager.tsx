@@ -28,7 +28,7 @@ export default function SaveManager() {
       setHistory(hist);
       if (status.directory) setDirInput(status.directory);
     } catch {
-      setError('无法连接到后端服务');
+      // 后端未启动时静默处理，UI 会自动显示未连接状态
     } finally {
       setLoading(false);
     }
