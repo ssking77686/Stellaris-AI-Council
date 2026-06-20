@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .models.database import init_db
-from .api import empire, agents, proposals, events, ws, court, chronicle, save
+from .api import empire, agents, proposals, events, ws, court, chronicle, save, config
 from .core.scheduler import setup_scheduler
 from .core.save_watcher import watcher_manager, _process_saved_file
 from .config import STELLARIS_SAVE_DIR
@@ -41,6 +41,7 @@ app.include_router(ws.router)
 app.include_router(court.router)
 app.include_router(chronicle.router)
 app.include_router(save.router)
+app.include_router(config.router)
 
 
 @app.get("/api/health")

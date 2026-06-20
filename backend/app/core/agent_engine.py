@@ -3,11 +3,41 @@ import re
 from openai import AsyncOpenAI
 from ..config import DEEPSEEK_API_KEY, DEEPSEEK_BASE_URL, DEEPSEEK_MODEL
 
-client = AsyncOpenAI(api_key=DEEPSEEK_API_KEY, base_url=DEEPSEEK_BASE_URL)
+_client: AsyncOpenAI | None = None
+
+
+def get_client() -> AsyncOpenAI:
+    global _client
+    if _client is None:
+        _client = AsyncOpenAI(api_key=DEEPSEEK_API_KEY, base_url=DEEPSEEK_BASE_URL)
+    return _client
+
+
+def reload_client(api_key: str = "", base_url: str = ""):
+    global _client
+    key = api_key or DEEPSEEK_API_KEY
+    url = base_url or DEEPSEEK_BASE_URL
+    _client = AsyncOpenAI(api_key=key, base_url=url)
+
+
+async def test_connection() -> dict:
+    """用当前配置发一条简单请求，验证 API Key 是否有效。"""
+    try:
+        client = get_client()
+        resp = await client.chat.completions.create(
+            model=DEEPSEEK_MODEL,
+            messages=[{"role": "user", "content": "Hi"}],
+            max_tokens=5,
+        )
+        reply = resp.choices[0].message.content or ""
+        return {"status": "ok", "message": f"连接成功，模型回复: {reply}"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
 
 
 async def call_agent(system_prompt: str, user_message: str, history: list[dict] = None) -> dict:
     """调用 DeepSeek API，返回 {text, proposals}"""
+    client = get_client()
     messages = [{"role": "system", "content": system_prompt}]
     if history:
         messages.extend(history)
@@ -37,6 +67,7 @@ async def call_agent(system_prompt: str, user_message: str, history: list[dict] 
 
 async def call_agent_stream(system_prompt: str, user_message: str, history: list[dict] = None):
     """流式调用 DeepSeek"""
+    client = get_client()
     messages = [{"role": "system", "content": system_prompt}]
     if history:
         messages.extend(history)

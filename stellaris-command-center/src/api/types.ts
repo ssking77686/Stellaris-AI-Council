@@ -139,3 +139,21 @@ export interface SaveUploadResponse {
   parsed: boolean;
   error: string | null;
 }
+
+// 系统配置
+export interface ConfigData {
+  api_key_masked: string;
+  base_url: string;
+  model: string;
+}
+
+export interface ConfigUpdate {
+  api_key: string;
+  base_url?: string;
+  model?: string;
+}
+
+export interface TestResult {
+  status: string;
+  message: string;
+}
