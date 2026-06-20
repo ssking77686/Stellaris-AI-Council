@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/api/client';
 import type { EmpireState } from '@/api/types';
+import { resources as fallbackResources } from '@/data/empire';
 
 interface GaugeDef {
   key: string; label: string; icon: string; max: number; color: string;
@@ -45,7 +46,21 @@ function RingGauge({ value, max, color, icon, label }: { value: number; max: num
 export default function ResourceGauges() {
   const [state, setState] = useState<EmpireState | null>(null);
 
-  useEffect(() => { api.getEmpireState().then(setState).catch(() => {}); }, []);
+  useEffect(() => {
+    api.getEmpireState().then(setState).catch(() => {
+      const resMap: Record<string, number> = {};
+      fallbackResources.forEach((r) => { resMap[r.id] = r.value; });
+      setState({
+        energy_credits: resMap.energy || 0,
+        minerals: resMap.mineral || 0,
+        food: resMap.food || 0,
+        consumer_goods: resMap.goods || 0,
+        alloys: resMap.alloy || 0,
+        influence: resMap.influence || 0,
+        unity: resMap.unity || 0,
+      } as EmpireState);
+    });
+  }, []);
 
   if (!state) return null;
 
