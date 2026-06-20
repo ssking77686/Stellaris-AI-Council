@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { events as fallbackEvents, approvals as fallbackApprovals } from '@/data/empire';
 
 interface ChronicleEntry {
   type: string;
@@ -73,9 +74,36 @@ export default function Chronicle() {
   const [filter, setFilter] = useState('all');
   const [loading, setLoading] = useState(true);
 
+  const tagMap: Record<string, string> = {
+    '提议': 'proposal', '报告': 'event', '预警': 'event', '协商': 'coordination',
+  };
+  const tagSubtype: Record<string, string> = {
+    '提议': 'proposal', '报告': 'report', '预警': 'alert', '协商': 'coordination',
+  };
+
   useEffect(() => {
     fetch('http://localhost:8001/api/chronicle/?limit=60').then(r => r.json())
-      .then(setEntries).catch(() => {}).finally(() => setLoading(false));
+      .then(setEntries).catch(() => {
+        const evEntries: ChronicleEntry[] = fallbackEvents.map((e) => ({
+          type: tagMap[e.tag] || 'event',
+          subtype: tagSubtype[e.tag] || 'random',
+          title: e.text,
+          description: '',
+          agent_id: '',
+          time: e.time,
+        }));
+        const apEntries: ChronicleEntry[] = fallbackApprovals.map((a) => ({
+          type: 'proposal',
+          subtype: 'pending',
+          title: a.title,
+          description: a.detail,
+          agent_id: '',
+          time: new Date().toISOString(),
+          status: 'pending',
+          cost: JSON.stringify(a.costs),
+        }));
+        setEntries([...evEntries, ...apEntries]);
+      }).finally(() => setLoading(false));
   }, []);
 
   const types = ['all', 'event', 'proposal', 'coordination', 'court'];

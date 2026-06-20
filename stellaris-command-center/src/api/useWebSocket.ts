@@ -5,10 +5,14 @@ type WSHandler = (data: any) => void;
 const listeners = new Map<string, Set<WSHandler>>();
 let ws: WebSocket | null = null;
 let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+let retryCount = 0;
+const MAX_RETRIES = 3;
 
 function connect() {
   if (ws && ws.readyState === WebSocket.OPEN) return;
   ws = new WebSocket('ws://localhost:8001/ws');
+
+  ws.onopen = () => { retryCount = 0; };
 
   ws.onmessage = (event) => {
     try {
@@ -19,7 +23,10 @@ function connect() {
   };
 
   ws.onclose = () => {
-    reconnectTimer = setTimeout(connect, 5000);
+    if (retryCount < MAX_RETRIES) {
+      retryCount++;
+      reconnectTimer = setTimeout(connect, 5000);
+    }
   };
 
   ws.onerror = () => {
