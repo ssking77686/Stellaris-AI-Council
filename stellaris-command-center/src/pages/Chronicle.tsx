@@ -74,7 +74,7 @@ export default function Chronicle() {
   const [filter, setFilter] = useState('all');
   const [loading, setLoading] = useState(true);
 
-  const tagToType: Record<string, string> = {
+  const tagSubtype: Record<string, string> = {
     '提议': 'proposal', '报告': 'report', '预警': 'alert', '协商': 'coordination',
   };
 
@@ -82,8 +82,8 @@ export default function Chronicle() {
     fetch('http://localhost:8001/api/chronicle/?limit=60').then(r => r.json())
       .then(setEntries).catch(() => {
         const evEntries: ChronicleEntry[] = fallbackEvents.map((e) => ({
-          type: tagToType[e.tag] || 'event',
-          subtype: e.tag === '提议' ? 'proposal' : e.tag === '报告' ? 'report' : e.tag === '预警' ? 'alert' : 'coordination',
+          type: tagSubtype[e.tag] === 'report' || tagSubtype[e.tag] === 'alert' ? 'event' : tagSubtype[e.tag],
+          subtype: tagSubtype[e.tag] || 'random',
           title: e.text,
           description: '',
           agent_id: '',
@@ -94,7 +94,7 @@ export default function Chronicle() {
           subtype: 'pending',
           title: a.title,
           description: a.detail,
-          agent_id: 'finance',
+          agent_id: '',
           time: new Date().toISOString(),
           status: 'pending',
           cost: JSON.stringify(a.costs),

@@ -12,9 +12,7 @@ function connect() {
   if (ws && ws.readyState === WebSocket.OPEN) return;
   ws = new WebSocket('ws://localhost:8001/ws');
 
-  ws.onopen = () => {
-    retryCount = 0;
-  };
+  ws.onopen = () => { retryCount = 0; };
 
   ws.onmessage = (event) => {
     try {
