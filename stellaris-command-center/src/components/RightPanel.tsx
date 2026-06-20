@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/api/client';
 import type { EmpireEvent, ProposalData } from '@/api/types';
+import { events as fallbackEvents, approvals as fallbackApprovals } from '@/data/empire';
 
 const tagStyles: Record<string, string> = {
   '提议': 'bg-[#3b82f6]/15 text-[#60a5fa] border border-[#3b82f6]/30',
@@ -32,8 +33,35 @@ export default function RightPanel() {
   const [approvals, setApprovals] = useState<ProposalData[]>([]);
 
   useEffect(() => {
-    api.getEvents().then(setEvents).catch(() => {});
-    api.getProposals('pending').then(setApprovals).catch(() => {});
+    api.getEvents().then(setEvents).catch(() => {
+      const tagMap: Record<string, string> = { '提议': 'proposal', '报告': 'report', '预警': 'alert', '协商': 'coordination' };
+      setEvents(fallbackEvents.map((e, i) => ({
+        id: i + 1,
+        event_type: tagMap[e.tag] || 'random',
+        title: e.text,
+        description: '',
+        agent_id: '',
+        created_at: e.time,
+      })));
+    });
+    api.getProposals('pending').then(setApprovals).catch(() => {
+      const titleToAgent: Record<string, string> = {
+        '财政大臣': 'finance', '军事大臣': 'military', '首席科学官': 'science',
+        '外交大臣': 'foreign', '内政大臣': 'interior', '建造与殖民大臣': 'construction',
+      };
+      setApprovals(fallbackApprovals.map((a) => {
+        const agentTitle = Object.keys(titleToAgent).find((k) => a.agent.startsWith(k)) || '';
+        return {
+          id: a.id,
+          agent_id: titleToAgent[agentTitle] || 'finance',
+          title: a.title,
+          description: a.detail,
+          cost: JSON.stringify(a.costs),
+          status: 'pending',
+          created_at: new Date().toISOString(),
+        };
+      }));
+    });
   }, []);
 
   const handleApproval = async (id: string, action: 'approve' | 'reject') => {
