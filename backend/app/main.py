@@ -31,7 +31,17 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="群星AI智囊团 API", lifespan=lifespan)
-app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:5173", "http://127.0.0.1:8080"], allow_methods=["*"], allow_headers=["*"])
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",   # Vite dev server
+        "http://localhost:4173",   # Vite preview
+        "http://127.0.0.1:5173",
+        "http://localhost:8001",   # Swagger docs
+    ],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(empire.router)
 app.include_router(agents.router)

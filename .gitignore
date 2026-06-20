@@ -29,6 +29,13 @@ node_modules/
 # Playwright MCP 临时文件
 .playwright-mcp/
 
+# 桌面打包产物
+打包/
+desktop/build/
+desktop/dist/
+desktop/www/
+stellaris-cc.spec
+
 # Claude Code 配置（含本地路径）
 CLAUDE.md
 
