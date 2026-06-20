@@ -71,4 +71,15 @@ export const api = {
     request<Record<string, unknown>[]>(`/api/court/history?limit=${limit}`),
   startCourt: () =>
     request<{ session_id: string }>('/api/court/start', { method: 'POST' }),
+
+  // 系统配置
+  getConfig: () =>
+    request<import('./types').ConfigData>('/api/config'),
+  updateConfig: (data: import('./types').ConfigUpdate) =>
+    request<import('./types').ConfigData>('/api/config', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  testConnection: () =>
+    request<import('./types').TestResult>('/api/config/test', { method: 'POST' }),
 };

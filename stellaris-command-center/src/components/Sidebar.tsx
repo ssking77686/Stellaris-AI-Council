@@ -10,6 +10,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
       { icon: '💬', label: '大臣对话', to: '/chat' },
       { icon: '📋', label: '审批面板', to: '/approvals' },
       { icon: '📂', label: '存档管理器', to: '/saves' },
+      { icon: '⚙', label: '系统设置', to: '/settings' },
     ],
   },
   {

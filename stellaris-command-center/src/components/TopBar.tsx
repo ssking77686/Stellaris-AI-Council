@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api } from '@/api/client';
 import type { EmpireState } from '@/api/types';
 import { resources as fallbackResources } from '@/data/empire';
@@ -15,6 +16,7 @@ function mapResources(state: EmpireState | null) {
 
 export default function TopBar() {
   const [empire, setEmpire] = useState<EmpireState | null>(null);
+  const navigate = useNavigate();
   useEffect(() => { api.getEmpireState().then(setEmpire).catch(() => {}); }, []);
   const resData = mapResources(empire);
 
@@ -67,7 +69,7 @@ export default function TopBar() {
           <span className="absolute top-1 right-1 w-[7px] h-[7px] rounded-full bg-[#ef4444] animate-pulse"
             style={{ boxShadow: '0 0 0 0 rgba(239,68,68,0.6)' }} />
         </button>
-        <button className="w-[34px] h-[34px] rounded-lg bg-black/30 border border-[hsl(222,28%,18%)] text-[#94a3b8] flex items-center justify-center text-[15px] hover:border-[#8b6914] hover:text-[#d4af37] transition-all duration-300">
+        <button onClick={() => navigate('/settings')} className="w-[34px] h-[34px] rounded-lg bg-black/30 border border-[hsl(222,28%,18%)] text-[#94a3b8] flex items-center justify-center text-[15px] hover:border-[#8b6914] hover:text-[#d4af37] transition-all duration-300 cursor-pointer">
           ⚙
         </button>
       </div>

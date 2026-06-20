@@ -9,6 +9,7 @@ import ApprovalPanel from '@/pages/ApprovalPanel';
 import CourtHall from '@/pages/CourtHall';
 import Chronicle from '@/pages/Chronicle';
 import SaveManager from '@/pages/SaveManager';
+import Settings from '@/pages/Settings';
 import { useWebSocket } from '@/api/useWebSocket';
 
 interface Toast { id: number; type: string; text: string }
@@ -99,6 +100,7 @@ export default function App() {
         <Route path="/court" element={<AppLayout><CourtHall /></AppLayout>} />
         <Route path="/chronicle" element={<AppLayout><Chronicle /></AppLayout>} />
         <Route path="/saves" element={<AppLayout><SaveManager /></AppLayout>} />
+        <Route path="/settings" element={<AppLayout><Settings /></AppLayout>} />
       </Routes>
     </BrowserRouter>
   );
