@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import rehypeSanitize from 'rehype-sanitize';
 import { api } from '@/api/client';
-import { agents as fallbackAgents } from '@/data/empire';
 import type { AgentInfo, ProposalData } from '@/api/types';
+import { agents as fallbackAgents } from '@/data/empire';
 
 interface Msg { role: 'agent' | 'user' | 'proposal'; text: string; proposals?: ProposalData[] }
 

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/api/client';
 import type { EmpireState } from '@/api/types';
+import { resources as fallbackResources } from '@/data/empire';
 
 interface GaugeDef {
   key: string; label: string; icon: string; max: number; color: string;
@@ -47,12 +48,16 @@ export default function ResourceGauges() {
 
   useEffect(() => {
     api.getEmpireState().then(setState).catch(() => {
+      const resMap: Record<string, number> = {};
+      fallbackResources.forEach((r) => { resMap[r.id] = r.value; });
       setState({
-        id: 0, name: '银河帝国', game_date: '2252.06.05',
-        energy_credits: 3200, minerals: 1500, food: 600, consumer_goods: 350,
-        alloys: 180, influence: 350, unity: 1200,
-        energy_income: 0, energy_expense: 0, mineral_income: 0,
-        trade_value: 0, naval_capacity: 0,
+        energy_credits: resMap.energy || 0,
+        minerals: resMap.mineral || 0,
+        food: resMap.food || 0,
+        consumer_goods: resMap.goods || 0,
+        alloys: resMap.alloy || 0,
+        influence: resMap.influence || 0,
+        unity: resMap.unity || 0,
       } as EmpireState);
     });
   }, []);
@@ -62,7 +67,7 @@ export default function ResourceGauges() {
   return (
     <div className="flex justify-center gap-4 py-3 px-4 bg-[#111827] border border-[hsl(222,28%,18%)] rounded-lg">
       {gauges.map((g) => (
-        <RingGauge key={g.key} value={Number((state as any)[g.key]) || 0} max={g.max} color={g.color} icon={g.icon} label={g.label} />
+        <RingGauge key={g.key} value={Number(state[g.key as keyof EmpireState]) || 0} max={g.max} color={g.color} icon={g.icon} label={g.label} />
       ))}
     </div>
   );
