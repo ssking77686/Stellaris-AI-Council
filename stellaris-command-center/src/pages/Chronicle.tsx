@@ -74,9 +74,6 @@ export default function Chronicle() {
   const [filter, setFilter] = useState('all');
   const [loading, setLoading] = useState(true);
 
-  const tagMap: Record<string, string> = {
-    '提议': 'proposal', '报告': 'event', '预警': 'event', '协商': 'coordination',
-  };
   const tagSubtype: Record<string, string> = {
     '提议': 'proposal', '报告': 'report', '预警': 'alert', '协商': 'coordination',
   };
@@ -85,7 +82,7 @@ export default function Chronicle() {
     fetch('http://localhost:8001/api/chronicle/?limit=60').then(r => r.json())
       .then(setEntries).catch(() => {
         const evEntries: ChronicleEntry[] = fallbackEvents.map((e) => ({
-          type: tagMap[e.tag] || 'event',
+          type: tagSubtype[e.tag] === 'report' || tagSubtype[e.tag] === 'alert' ? 'event' : tagSubtype[e.tag],
           subtype: tagSubtype[e.tag] || 'random',
           title: e.text,
           description: '',
