@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/api/client';
 import type { ProposalData } from '@/api/types';
+import { approvals as fallbackApprovals } from '@/data/empire';
 
 const agentIcons: Record<string, string> = {
   finance: '💰', military: '⚔', science: '🔬', foreign: '🤝', interior: '🏛', construction: '🏗',
@@ -30,7 +31,24 @@ export default function ApprovalPanel() {
     try {
       const data = await api.getProposals();
       setProposals(data);
-    } catch { /* 后端未启动时静默处理 */ }
+    } catch {
+      const titleToAgent: Record<string, string> = {
+        '财政大臣': 'finance', '军事大臣': 'military', '首席科学官': 'science',
+        '外交大臣': 'foreign', '内政大臣': 'interior', '建造与殖民大臣': 'construction',
+      };
+      setProposals(fallbackApprovals.map((a) => {
+        const agentTitle = Object.keys(titleToAgent).find((k) => a.agent.startsWith(k)) || '';
+        return {
+          id: a.id,
+          agent_id: titleToAgent[agentTitle] || 'finance',
+          title: a.title,
+          description: a.detail,
+          cost: JSON.stringify(a.costs),
+          status: 'pending',
+          created_at: new Date().toISOString(),
+        };
+      }));
+    }
     setLoading(false);
   };
 
