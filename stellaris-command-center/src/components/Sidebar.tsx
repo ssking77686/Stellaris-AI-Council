@@ -49,7 +49,6 @@ export default function Sidebar() {
               style={({ isActive }) => (isActive ? { background: 'linear-gradient(90deg, rgba(212,175,55,0.12), transparent)', boxShadow: 'inset 0 0 20px rgba(212,175,55,0.05)' } : {})}>
               <span className="text-[17px] w-6 text-center">{item.icon}</span>
               {item.label}
-              {item.badge && <span className="ml-auto bg-[#ef4444]/80 text-white text-[10px] px-1.5 py-0.5 rounded-lg font-mono" style={{ boxShadow: '0 0 10px rgba(239,68,68,0.3)' }}>{item.badge}</span>}
             </NavLink>
           ))}
         </div>

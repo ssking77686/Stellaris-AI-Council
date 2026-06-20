@@ -45,7 +45,17 @@ function RingGauge({ value, max, color, icon, label }: { value: number; max: num
 export default function ResourceGauges() {
   const [state, setState] = useState<EmpireState | null>(null);
 
-  useEffect(() => { api.getEmpireState().then(setState).catch(() => {}); }, []);
+  useEffect(() => {
+    api.getEmpireState().then(setState).catch(() => {
+      setState({
+        id: 0, name: '银河帝国', game_date: '2252.06.05',
+        energy_credits: 3200, minerals: 1500, food: 600, consumer_goods: 350,
+        alloys: 180, influence: 350, unity: 1200,
+        energy_income: 0, energy_expense: 0, mineral_income: 0,
+        trade_value: 0, naval_capacity: 0,
+      } as EmpireState);
+    });
+  }, []);
 
   if (!state) return null;
 

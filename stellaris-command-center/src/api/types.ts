@@ -68,6 +68,18 @@ export interface EmpireEvent {
   created_at: string;
 }
 
+export interface ChronicleEntry {
+  type: string;
+  subtype: string;
+  title: string;
+  description: string;
+  agent_id: string;
+  time: string;
+  status?: string;
+  cost?: string;
+  session_id?: string;
+}
+
 // 存档管理
 export interface WatcherStatus {
   running: boolean;

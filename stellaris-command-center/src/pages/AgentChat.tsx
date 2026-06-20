@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
+import rehypeSanitize from 'rehype-sanitize';
 import { api } from '@/api/client';
+import { agents as fallbackAgents } from '@/data/empire';
 import type { AgentInfo, ProposalData } from '@/api/types';
 
 interface Msg { role: 'agent' | 'user' | 'proposal'; text: string; proposals?: ProposalData[] }
@@ -21,7 +23,11 @@ export default function AgentChat() {
   const [messages, setMessages] = useState<Record<string, Msg[]>>({});
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => { api.getAgentList().then(setAgents).catch(() => {}); }, []);
+  useEffect(() => {
+    api.getAgentList().then(setAgents).catch(() => {
+      setAgents(fallbackAgents.map((a) => ({ id: a.id, role_name: a.role, domain: a.name })));
+    });
+  }, []);
 
   const currentMsgs = messages[active] || [];
   const info = agents.find((a) => a.id === active);
@@ -94,7 +100,7 @@ export default function AgentChat() {
                   ${msg.role === 'user'
                     ? 'bg-[#1e3a5f] text-[#e2e8f0] rounded-br-none'
                     : 'bg-[#1a1f2e] text-[#94a3b8] rounded-bl-none border-l-2 border-l-[#d4af37] markdown-body'}`}>
-                  {msg.role === 'agent' ? <ReactMarkdown>{msg.text}</ReactMarkdown> : msg.text}
+                  {msg.role === 'agent' ? <ReactMarkdown rehypePlugins={[rehypeSanitize]}>{msg.text}</ReactMarkdown> : msg.text}
                 </div>
               </div>
               {msg.proposals && msg.proposals.length > 0 && (

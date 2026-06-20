@@ -40,7 +40,7 @@ export const api = {
 
   // 编年史
   getChronicle: (limit = 60) =>
-    request<any[]>(`/api/chronicle/?limit=${limit}`),
+    request<import('./types').ChronicleEntry[]>(`/api/chronicle/?limit=${limit}`),
 
   // 存档管理
   getWatcherStatus: () =>
@@ -63,4 +63,12 @@ export const api = {
     request<import('./types').SaveRecord[]>(`/api/save/history?limit=${limit}`),
   getSaveDetail: (id: number) =>
     request<import('./types').SaveDetail>(`/api/save/${id}/detail`),
+
+  // 朝会
+  getCourtCurrent: () =>
+    request<{ session: Record<string, unknown> | null }>('/api/court/current'),
+  getCourtHistory: (limit = 5) =>
+    request<Record<string, unknown>[]>(`/api/court/history?limit=${limit}`),
+  startCourt: () =>
+    request<{ session_id: string }>('/api/court/start', { method: 'POST' }),
 };
